@@ -1,0 +1,33 @@
+inherit_from: .rubocop_todo.yml
+
+require:
+  - rubocop-rake
+  - rubocop-rspec
+
+AllCops:
+  NewCops: enable
+  TargetRubyVersion: 2.6
+
+Style/StringLiterals:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Style/StringLiteralsInInterpolation:
+  Enabled: true
+  EnforcedStyle: double_quotes
+
+Layout/LineLength:
+  Max: 120
+
+Style/Documentation:
+  Enabled: false
+
+#追加
+Style/FrozenStringLiteralComment:
+  Enabled: false
+#
+Style/StringConcatenation:
+  Enabled: false
+#
+Naming/AccessorMethodName:
+  Enabled: false
