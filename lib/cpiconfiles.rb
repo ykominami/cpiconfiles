@@ -8,6 +8,7 @@ require_relative 'cpiconfiles/cli'
 require_relative 'cpiconfiles/sizepattern'
 require_relative 'cpiconfiles/iconfile'
 require_relative 'cpiconfiles/iconlist'
+require_relative 'cpiconfiles/iconfilegroup'
 require_relative 'cpiconfiles/sizeddir'
 require_relative 'cpiconfiles/loggerxcm'
 

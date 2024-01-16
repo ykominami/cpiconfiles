@@ -12,7 +12,7 @@ module Cpiconfiles
     attr_accessor :valid_ext, :valid_name, :basename,
                   :str_reason,
                   :pathn, :base_pn, :extname, :kind, :icon_size,
-                  :relative_pathn
+                  :relative_pathn, :parent_sizeddir
 
     def initialize(top_dir_pn, pathn, sizepat, parent_sizeddir = nil)
       @top_dir_pn = top_dir_pn
@@ -38,7 +38,7 @@ module Cpiconfiles
     def determine_icon_size(basename)
       return unless @valid_ext
 
-      way, md, @head_str, @tail_str = sizepat.size_specified_name_pattern?(basename)
+      way, md, @head_str, @tail_str = @sizepat.size_specified_name_pattern?(basename)
       case way
       when Sizepattern::SIZE_STRING
         @icon_size = determine_icon_size_by_symbol(md.to_sym)
