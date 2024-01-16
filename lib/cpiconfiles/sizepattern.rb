@@ -13,7 +13,7 @@ module Cpiconfiles
     FROM_PARENT_SIZEDDIR = :FROM_PARENT_SIZEDDIR
     INVALID_PATTERN = :INVALID_PATTERN
 
-    def initialize()
+    def initialize
       # @pats = {}
     end
 
@@ -21,50 +21,50 @@ module Cpiconfiles
       way = 0
       # Loggerxcm.debug"Sizepattern basename=#{basename}"
       mdx = case basename
-            when /([^(\-|_\d)]*)(\-|_)(hdpi|mdpi|xhdpi|xxhdpi|xxxhdpi)/
-              head = $1
-              md = $3
+            when /([^(\-|_\d)]*)(-|_)(hdpi|mdpi|xhdpi|xxhdpi|xxxhdpi)/
+              head = ::Regexp.last_match(1)
+              md = ::Regexp.last_match(3)
               way = SIZE_STRING
               md
             # when /([^(\-|_|\d)]*)(\-|_|)(\d+)x(\d+)/
             when /([^\d]*)(\d+)x(\d+)/
-              md = $2
-              head = $1
+              md = ::Regexp.last_match(2)
+              head = ::Regexp.last_match(1)
               tail = nil
               way = :NUMBER_NUMBER
               md
             # when /(.*)(\d+)([^\d])(\d+)((\-|_)*)(.*)/
-            when /(.*)(\-|_)(\d+)(\-|_)([^\d]*)$/
-              md = $3
-              head = $1
-              tail = $5
+            when /(.*)(-|_)(\d+)(-|_)([^\d]*)$/
+              md = ::Regexp.last_match(3)
+              head = ::Regexp.last_match(1)
+              tail = ::Regexp.last_match(5)
               way = NUMBER_NUMBER2
               md
-            when /(.*)(\-|_)(\d+)(.*)$/
-              md = $3
-              head = $1
-              tail = $5
+            when /(.*)(-|_)(\d+)(.*)$/
+              md = ::Regexp.last_match(3)
+              head = ::Regexp.last_match(1)
+              tail = ::Regexp.last_match(4)
               way = NUMBER_NUMBER3
               md
             when /^(\d+)$/
-              md = $1
+              md = ::Regexp.last_match(1)
               head = nil
               way = NUMBER_ONLY
               md
-            when /(.*)(\d+)((\-|_)*)([^\d]+)$/
-              head = $1
-              md = $2
-              tail = $5
+            when /(.*)(\d+)((-|_)*)([^\d]+)$/
+              head = ::Regexp.last_match(1)
+              md = ::Regexp.last_match(2)
+              tail = ::Regexp.last_match(5)
               way = NUMBER3
               md
-            when /(.+)(\-|_)(\d+)/
-              head = $1
-              md = $3
+            when /(.+)(-|_)(\d+)/
+              head = ::Regexp.last_match(1)
+              md = ::Regexp.last_match(3)
               way = NUMBER2
               md
             when /([^\d]*)(\d+)/
-              md = $2
-              head = $1
+              md = ::Regexp.last_match(2)
+              head = ::Regexp.last_match(1)
               way = NUMBER
               md
             else
@@ -75,17 +75,17 @@ module Cpiconfiles
       [way, mdx, head, tail]
     end
 
-    def mat(pat, s)
+    def mat(pat, str)
       reg = Regexp.new(pat)
       ret = 0
 
-      case s
+      case str
       when reg
-        Loggerxcm.debug "match"
+        Loggerxcm.debug 'match'
         Loggerxcm.debug MatchData
         ret = 1
       else
-        Loggerxcm.debug "etc"
+        Loggerxcm.debug 'etc'
         Loggerxcm.debug MatchData
       end
 

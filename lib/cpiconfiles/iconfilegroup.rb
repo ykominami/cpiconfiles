@@ -12,9 +12,9 @@ module Cpiconfiles
     end
 
     def print
-      @iconfiles.map { |key, icf|
+      @iconfiles.map do |key, icf|
         Loggerxcm.debug "#{key} | #{icf.pathn}"
-      }
+      end
     end
   end
 end
