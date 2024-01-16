@@ -3,12 +3,13 @@
 require 'pathname'
 require 'loggerx'
 
-require_relative "cpiconfiles/version"
-require_relative "cpiconfiles/sizepattern"
-require_relative "cpiconfiles/iconfile"
-require_relative "cpiconfiles/iconlist"
-require_relative "cpiconfiles/sizeddir"
-require_relative "cpiconfiles/loggerxcm"
+require_relative 'cpiconfiles/version'
+require_relative 'cpiconfiles/cli'
+require_relative 'cpiconfiles/sizepattern'
+require_relative 'cpiconfiles/iconfile'
+require_relative 'cpiconfiles/iconlist'
+require_relative 'cpiconfiles/sizeddir'
+require_relative 'cpiconfiles/loggerxcm'
 
 module Cpiconfiles
   class Error < StandardError; end

@@ -8,7 +8,7 @@ module Cpiconfiles
       @basename = @pathn.basename
       result, md, head_str = sizepat.size_specified_name_pattern?(@basename)
       @head_str = head_str
-      @valid = result != :INVALID_PATTERN ? true : false
+      @valid = result != :INVALID_PATTERN
       @size = md.to_i if @valid
 
       Loggerxcm.debug "Sizedir #{@pathn}" if @valid
