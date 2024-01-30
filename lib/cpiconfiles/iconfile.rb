@@ -9,16 +9,18 @@ module Cpiconfiles
       # Loggerxcm.debug "ret=#{ret}"
     end
 
-    attr_accessor :valid_ext, :valid_name, :basename,
+    attr_accessor :valid_ext, :valid_name, :basename,:parent_basename,
                   :str_reason,
                   :pathn, :base_pn, :extname, :kind, :icon_size,
-                  :relative_pathn, :parent_sizeddir
+                  :relative_pathn, :parent_sizeddir,
+                  :pattern, :l1, :l2, :category
 
     def initialize(top_dir_pn, pathn, sizepat, parent_sizeddir = nil)
       @top_dir_pn = top_dir_pn
       @sizepat = sizepat
       @parent_sizeddir = parent_sizeddir
       @valid_name = true
+      raise NotPathnameClassError unless pathn.instance_of?(Pathname)
       @pathn = pathn
       @relative_pathn = @pathn.relative_path_from(@top_dir_pn)
       @head_str = nil
@@ -28,11 +30,59 @@ module Cpiconfiles
       @base_pn = @pathn.basename
       @basename = @base_pn.basename('.*').to_s
       @extname = @base_pn.extname[1..]
+      @category = @pathn.parent.basename('.*').to_s
       @kind = @extname.to_s.upcase.to_sym
       @valid_ext = Iconfile.valid_ext(@kind)
       # Loggerxcm.debug "Iconfile#initialize  @valid_ext=#{@valid_ext} #{path}"
       @icon_size = -1
       determine_icon_size(@basename)
+
+      @pattern, kx1, kx2, kx3 = determine_basename_pattern(@basename)
+      determine_hier(@pattern, kx1, kx2, kx3)
+    end
+
+    def determine_hier(pattern, kx1, kx2, kx3)
+      case pattern
+      when :three_parts
+        @l1 = kx1
+        @l2 = kx3
+        # when :with_twice_size , :with_twice_size_2, :with_space_and_twice_size, :else
+        #  @l1 = kx1
+      else
+        @l1 = kx1
+      end
+    end
+
+    def determine_basename_pattern(basename)
+      kx = basename
+      if kx =~ /^(.+)\-(.+)\-(.+)$/
+        kx1 = $1
+        kx2 = $2
+        kx3 = $3
+        return [:three_parts, kx1, kx2, kx3]
+      elsif kx =~ /^(.+)\-(.+)x(.+)$/
+        # not match
+        kx1 = $1
+        kx2 = $2
+        kx3 = $3
+        return [:with_twice_size, kx1, kx2, kx3]
+      elsif kx =~ /^(.+)_(.+)x(.+)$/
+        kx1 = $1
+        kx2 = $2
+        kx3 = $3
+        return [:with_twice_size_2, kx1, kx2, kx3]
+      elsif kx =~ /^(.+)(\s+)(.+)x(.+)$/
+        # not match
+        kx1 = $1
+        kx2 = $2
+        kx3 = $3
+        kx4 = $4
+        kx1ex = "#{kx1}#{kx2}"
+        return [:with_space_and_twice_size, kx1ex, kx3, kx4]
+      else
+        kx1 = kx
+        return [:else, kx1]
+      end
     end
 
     def determine_icon_size(basename)
