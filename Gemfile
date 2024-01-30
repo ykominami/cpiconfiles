@@ -5,11 +5,11 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in cpiconfiles.gemspec
 gemspec
 
+gem 'google-api-client'
 gem 'loggerx', '~> 0.2.0'
 gem 'rake', '~> 13.0'
-gem 'thor'
-gem 'google-api-client'
 gem 'secretmgr'
+gem 'thor'
 
 group :test, :development, optional: true do
   gem 'rspec', '~> 3.0'

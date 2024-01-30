@@ -84,8 +84,8 @@ module Cpiconfiles
       csv_file = Pathname.new(csv_file)
       csv_file.open('w') do |file|
         @iconfilegroups.map do |key, icfg|
-            puts "iconlist save_as_csv key=#{key}"
-            icfg.save_as_csv(file)
+          puts "iconlist save_as_csv key=#{key}"
+          icfg.save_as_csv(file)
         end
       end
       Loggerxcm.debug "############################## Iconlist#save_as_csv E csv_file=#{csv_file}"
@@ -112,25 +112,25 @@ module Cpiconfiles
 
     def print
       @iconfilegroups.map do |key, icfg|
-        Loggerxcm.debug "#{key}"
+        Loggerxcm.debug key
         icfg.print
       end
     end
 
     def print_l1
-      @iconfilegroups.map do |key, icfg|
+      @iconfilegroups.map do |_key, icfg|
         icfg.print_l1
       end
     end
 
     def print_l1_icon_size
-      @iconfilegroups.map do |key, icfg|
+      @iconfilegroups.map do |_key, icfg|
         icfg.print_l1_icon_size
       end
     end
 
     def print_l2
-      @iconfilegroups.map do |key, icfg|
+      @iconfilegroups.map do |_key, icfg|
         icfg.print_l2
       end
     end

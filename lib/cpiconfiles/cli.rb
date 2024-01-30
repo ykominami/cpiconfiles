@@ -2,7 +2,7 @@ module Cpiconfiles
   class Cli
     def initialize
       log_level = :debug
-      #log_level = :info
+      # log_level = :info
       Loggerxcm.log_init(log_level)
     end
 
@@ -47,7 +47,7 @@ module Cpiconfiles
     end
 
     def execute
-      iconlist, loaded = setup()
+      iconlist, = setup
 
       # デバッグのため、強制的に再構築する
       loaded = false
@@ -56,7 +56,7 @@ module Cpiconfiles
 
       analyze(iconlist)
       p "cred=#{GoogleDrive.get_credentials}"
-      csv_fname = "a.csv"
+      csv_fname = 'a.csv'
       iconlist.save_as_csv(csv_fname)
 
       # exit
@@ -67,7 +67,7 @@ module Cpiconfiles
     end
 
     def print
-      iconlist, loaded = setup()
+      iconlist, = setup
 
       # デバッグのため、強制的に再構築する
       loaded = false
@@ -76,7 +76,7 @@ module Cpiconfiles
 
       analyze(iconlist)
       p "cred=#{GoogleDrive.get_credentials}"
-      csv_fname = "a.csv"
+      csv_fname = 'a.csv'
       iconlist.save_as_csv(csv_fname)
 
       # exit
@@ -88,7 +88,6 @@ module Cpiconfiles
       iconlist.print_l1
       iconlist.print_l1_icon_size
       iconlist.print_l2
-
     end
   end
 end
