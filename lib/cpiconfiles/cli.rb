@@ -1,83 +1,34 @@
 module Cpiconfiles
   class Cli
     def initialize
-      # log_level = :debug
-      log_level = :info
+      log_level = :debug
+      #log_level = :info
       Loggerxcm.log_init(log_level)
     end
 
-    def arg_parse(argv)
-      top_dir = argv[0]
-      dump_fname = argv[1]
-      @sizepat = Sizepattern.new
-
-      useage = "useage: #{$0} top_dir dump_file"
-      puts argv.size
-
-      if argv.size != 2
-        puts useage
-        puts '0'
-        exit(10)
-      end
-
-      if !top_dir.nil? && top_dir.strip.empty?
-        puts useage
-        puts '1'
-        exit(20)
-      end
-
-      if !dump_fname.nil? && dump_fname.strip.empty?
-        puts useage
-        puts '2'
-        exit(30)
-      end
-
-      @top_dir_pn = Pathname.new(top_dir).expand_path
+    def set_vars(top_dir_pn, dump_fname)
+      @top_dir_pn = top_dir_pn
       @dump_fname = dump_fname
     end
 
-    def get_icon_files(dir_pn, parent_sizeddir = nil)
-      icon_files = []
-      # Loggerxcm.debug  "dir_pn~#{dir_pn}"
-      dir_pn.children.each do |pn|
-        # Loggerxcm.debug  "pn=#{pn}"
-        if pn.file?
-          icf = Iconfile.new(@top_dir_pn, pn, @sizepat, parent_sizeddir)
-          next unless icf.valid
-
-          icon_files << icf
-        else
-          sizeddir = Sizeddir.new(pn, @sizepat)
-          sizeddirx = if sizeddir.valid
-                        sizeddir
-                      else
-                        parent_sizeddir
-                      end
-          icon_files2 = get_icon_files(pn, sizeddirx)
-          icon_files += icon_files2
-        end
-      end
-      icon_files
-    end
-
-    def execute
+    def setup
       loaded = false
-      iconlist = Iconlist.new(@dump_fname)
+      iconlist = Iconlist.new(@dump_fname, @top_dir_pn)
       if File.exist?(@dump_fname)
         iconlist.load
-        #  loaded = iconlist.check_files
+        loaded = true
+        #  loaded = iconlist.check_files2
         #  iconlist.print_pathns()
       end
+      [iconlist, loaded]
+    end
 
-      unless loaded
-        Loggerxcm.debug 'Search'
-        iconfiles = get_icon_files(@top_dir_pn)
-        Loggerxcm.debug "iconfiles.size=#{iconfiles.size}"
-        iconlist.create_paths(iconfiles)
-        # iconlist.check_files
-      end
+    def collect(iconlist)
+      Loggerxcm.debug 'Collect'
+      iconlist.collect(@top_dir_pn)
+    end
 
-      iconlist.print_pathns2
+    def analyze(iconlist)
       Loggerxcm.debug iconlist.l1_keys
       iconlist.l1_keys.map do |l1_key|
         iconlist.l2_keys(l1_key).map do |l2_key|
@@ -93,9 +44,51 @@ module Cpiconfiles
           end
         end
       end
-      # exit
+    end
 
-      iconlist.save
+    def execute
+      iconlist, loaded = setup()
+
+      # デバッグのため、強制的に再構築する
+      loaded = false
+
+      collect(iconlist) unless loaded
+
+      analyze(iconlist)
+      p "cred=#{GoogleDrive.get_credentials}"
+      csv_fname = "a.csv"
+      iconlist.save_as_csv(csv_fname)
+
+      # exit
+      # gd = GoogleDrive.new
+      # gd.upload(iconlist.save_as_csv)
+
+      iconlist.dump
+    end
+
+    def print
+      iconlist, loaded = setup()
+
+      # デバッグのため、強制的に再構築する
+      loaded = false
+
+      collect(iconlist) unless loaded
+
+      analyze(iconlist)
+      p "cred=#{GoogleDrive.get_credentials}"
+      csv_fname = "a.csv"
+      iconlist.save_as_csv(csv_fname)
+
+      # exit
+      # gd = GoogleDrive.new
+      # gd.upload(iconlist.save_as_csv)
+
+      # iconlist.dump
+      iconlist.print
+      iconlist.print_l1
+      iconlist.print_l1_icon_size
+      iconlist.print_l2
+
     end
   end
 end

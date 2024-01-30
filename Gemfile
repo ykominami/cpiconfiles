@@ -7,6 +7,9 @@ gemspec
 
 gem 'loggerx', '~> 0.2.0'
 gem 'rake', '~> 13.0'
+gem 'thor'
+gem 'google-api-client'
+gem 'secretmgr'
 
 group :test, :development, optional: true do
   gem 'rspec', '~> 3.0'
