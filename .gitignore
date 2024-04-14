@@ -20,6 +20,11 @@ dump*.txt
 ?.csv
 ?.rb
 ?.txt
+?.yml
+?.json
+??.yml
+??.json
+*.bat
 *.thor
 *.code-workspace
 command.bat

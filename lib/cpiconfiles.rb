@@ -10,6 +10,7 @@ require_relative 'cpiconfiles/iconfilegroup_array'
 require_relative 'cpiconfiles/sizepattern'
 require_relative 'cpiconfiles/iconfile'
 require_relative 'cpiconfiles/iconlist'
+require_relative 'cpiconfiles/iconfilesubgroup'
 require_relative 'cpiconfiles/iconfilegroup'
 require_relative 'cpiconfiles/sizeddir'
 require_relative 'cpiconfiles/loggerxcm'
@@ -21,6 +22,7 @@ require_relative 'cpiconfiles/cpiconfx'
 
 require_relative 'cpiconfiles/cmd'
 require_relative 'cpiconfiles/cli'
+require_relative 'cpiconfiles/yamlstore'
 
 module Cpiconfiles
   class Error < StandardError; end
