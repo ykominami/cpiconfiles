@@ -14,8 +14,10 @@ jobs:
     strategy:
       matrix:
         ruby:
-          - "3.2.1"
+          - "3.3.0"
 
+    env:
+      BUNDLE_WITH: test
     steps:
       - uses: actions/checkout@v4
       - name: Set up Ruby
