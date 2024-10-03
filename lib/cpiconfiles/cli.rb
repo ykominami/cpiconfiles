@@ -4,81 +4,78 @@ module Cpiconfiles
       log_level = :debug
       # log_level = :info
       Loggerxcm.log_init(log_level)
+      @sizepat = Sizepattern.new
     end
 
-    def set_vars(top_dir_pn, dump_fname)
+    def set_vars(top_dir_pn, dump_fname, csv_fname)
       @top_dir_pn = top_dir_pn
       @dump_fname = dump_fname
+      @csv_fname = csv_fname
     end
 
     def setup
-      loaded = false
-      iconlist = Iconlist.new(@dump_fname, @top_dir_pn)
-      if File.exist?(@dump_fname)
+      iconlist = Iconlist.new(@dump_fname, @sizepat, @top_dir_pn)
+      iconlist.show_iconfilegroups
+      if @dump_fname && File.exist?(@dump_fname)
+        Loggerxcm.debug '#=== [Cli] Load'
         iconlist.load
-        loaded = true
-        #  loaded = iconlist.check_files2
-        #  iconlist.print_pathns()
       end
-      [iconlist, loaded]
+      iconlist.show_iconfilegroups
+      iconlist
     end
 
     def collect(iconlist)
-      Loggerxcm.debug 'Collect'
+      Loggerxcm.debug '#=== [Cli] Collect'
       iconlist.collect(@top_dir_pn)
     end
 
-    def analyze(iconlist)
-      Loggerxcm.debug iconlist.l1_keys
-      iconlist.l1_keys.map do |l1_key|
-        iconlist.l2_keys(l1_key).map do |l2_key|
-          Loggerxcm.debug "#{l1_key}|#{l2_key}"
-          xitem = iconlist.pathn_by_keys(l1_key, l2_key)
-          next unless xitem.instance_of?(Hash)
-
-          xitem.each do |l3_key, l3_array|
-            Loggerxcm.debug "#{l1_key}|#{l2_key}|#{l3_key}"
-            l3_array.map do |icf|
-              Loggerxcm.debug "1 icf.relative_pathn=#{icf.relative_pathn} icf.icon_size=#{icf.icon_size}"
-            end
-          end
-        end
-      end
+    def execute
+      execute_bpdy
     end
 
-    def execute
-      iconlist, = setup
-
+    def execute_body
+      iconlist = setup
+      iconlist.show_iconfilegroups
+      raise unless iconlist
       # デバッグのため、強制的に再構築する
-      loaded = false
+      # loaded = false
+      collect(iconlist) unless iconlist.valid?
+      # iconlist.show_iconfilegroups
 
-      collect(iconlist) unless loaded
-
-      analyze(iconlist)
+      iconlist.setup_for_iconfiles
+      iconlist.analyze
       p "cred=#{GoogleDrive.get_credentials}"
-      csv_fname = 'a.csv'
-      iconlist.save_as_csv(csv_fname)
 
-      # exit
-      # gd = GoogleDrive.new
-      # gd.upload(iconlist.save_as_csv)
-
+      iconlist.save_as_csv(@csv_fname) if @csv_fname
       iconlist.dump
+      iconlist
+    end
+
+    def json
+      iconlist = execute_body
+      iconlist.json
+    end
+
+    def yaml
+      iconlist = execute_body
+      iconlist.save_to_obj(-1)
+      Yamlstore.add_iconlist(iconlist)
+    end
+
+    def restore(obj, dump_fname, sizepat)
+      Yamlstore.restore(obj, dump_fname, @sizepat)
+      iconlist = setup
+      iconlist.restore()
+      iconlist.print2
+    end
+
+    def print2
+      iconlist = execute_body
+      iconlist.print2
     end
 
     def print
-      iconlist, = setup
-
-      # デバッグのため、強制的に再構築する
-      loaded = false
-
-      collect(iconlist) unless loaded
-
-      analyze(iconlist)
-      p "cred=#{GoogleDrive.get_credentials}"
-      csv_fname = 'a.csv'
-      iconlist.save_as_csv(csv_fname)
-
+      iconlist = print_prepare
       # exit
       # gd = GoogleDrive.new
       # gd.upload(iconlist.save_as_csv)

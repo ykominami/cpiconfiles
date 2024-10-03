@@ -1,45 +1,134 @@
 module Cpiconfiles
   class Iconfile
+    @store_class = Struct.new("IconfileSave",
+                              :id_num,
+                              :top_dir,
+                              :path,
+                              :relative_path,
+                              :basename,
+                              :extname,
+                              :category,
+                              :kind,
+                              :valid_ext,
+                              :icon_size,
+                              :l1,
+                              :l2)
+    @store_idnum_class = Struct.new("IconfileSaveIdnum", :idnum)
+
     # @valid_exts = [:PNG, :JPG, :JPEG, :GIF, :SVG]
     @valid_exts = [:PNG, :GIF, :SVG]
+    @sizepat = Sizepattern.new
 
-    def self.valid_ext(sym)
-      # Loggerxcm.debug "sym=#{sym}"
-      @valid_exts.include?(sym)
-      # Loggerxcm.debug "ret=#{ret}"
+    class << @store_class
+      define_method(:recover) do
+      end
+
+      define_method(:load_from_obj) do
+        p @path
+      end
+
+      define_method(:to_h) do
+        hash = {}
+        hash["id_num"] = @id_num
+        hash["top_dir"] = @top_dir.to_s
+        hash["path"] = @pathnto_s.to_s
+        hash["relative_path"] = @relative_pathn.to_s
+        hash["basename"] = @basename.to_s
+        hash["extname"] = @extname.to_s
+        hash["category"] = @category.to_s
+        hash["kind"] = @kind
+        hash["valid_ext"] = @valid_ext
+        hash["icon_size"] = @icon_size
+        hash
+      end
     end
 
+    class << self
+      def store_class
+        @store_class
+      end
+
+      def make_store(value)
+        @store_class.new(value)
+      end
+
+      def valid_ext(sym)
+        # Loggerxcm.debug "sym=#{sym}"
+        @valid_exts.include?(sym)
+
+        # Loggerxcm.debug "ret=#{ret}"
+      end
+=begin
+      def create(value, sizepat)
+        s_inst = @store_class.new(**value)
+        top_dir_pn = Pathname.new(s_inst.top_dir)
+        pathn = Pathname.new(s_inst.path)
+        new(top_dir_pn, pathn, sizepat)
+      end
+=end
+      def restore(hash, sizepat)
+        obj_hs = {}
+        hash.each do |value|
+          obj_hs[id_num] = create(value, sizepat)
+        end
+        obj_hs
+      end
+    end
     attr_accessor :valid_ext, :valid_name, :basename, :parent_basename,
                   :str_reason,
-                  :pathn, :base_pn, :extname, :kind, :icon_size,
+                  :top_dir_pn, :pathn, :base_pn, :extname, :kind, :icon_size,
                   :relative_pathn, :parent_sizeddir,
                   :pattern, :l1, :l2, :category
 
     def initialize(top_dir_pn, pathn, sizepat, parent_sizeddir = nil)
-      @top_dir_pn = top_dir_pn
       @sizepat = sizepat
       @parent_sizeddir = parent_sizeddir
       @valid_name = true
-      raise NotPathnameClassError unless pathn.instance_of?(Pathname)
-
-      @pathn = pathn
-      @relative_pathn = @pathn.relative_path_from(@top_dir_pn)
+      #
       @head_str = nil
       @tail_str = nil
       @str_reason = nil
-      # Loggerxcm.debug "Iconfile#initialize Iconfile.new @pathn=#{@pathn}"
+      #
+      @top_dir_pn = top_dir_pn
+      raise NotPathnameClassError unless pathn.instance_of?(Pathname)
+      @pathn = pathn
+      @relative_pathn = @pathn.relative_path_from(@top_dir_pn)
       @base_pn = @pathn.basename
-      @basename = @base_pn.basename('.*').to_s
+      #
+      @basename = @base_pn.basename(".*").to_s
       @extname = @base_pn.extname[1..]
-      @category = @pathn.parent.basename('.*').to_s
+      @category = @pathn.parent.basename(".*").to_s
       @kind = @extname.to_s.upcase.to_sym
       @valid_ext = Iconfile.valid_ext(@kind)
-      # Loggerxcm.debug "Iconfile#initialize  @valid_ext=#{@valid_ext} #{path}"
       @icon_size = -1
+      @l1 = nil
+      @l2 = nil
+      #
+      # Loggerxcm.debug "Iconfile#initialize  @valid_ext=#{@valid_ext} #{path}"
       determine_icon_size(@basename)
-
       @pattern, kx1, kx2, kx3 = determine_basename_pattern(@basename)
       determine_hier(@pattern, kx1, kx2, kx3)
+    end
+
+    def make(count)
+      self.class.store_class.new(
+                      count,
+                       @top_dir_pn.to_s,
+                       @pathn.to_s,
+                       @relative_pathn.to_s,
+                       @basename,
+                       @extname,
+                       @category,
+                       @kind,
+                       @valid_ext,
+                       @icon_size,
+                       @l1,
+                       @l2)
+    end
+
+    def save_to_obj(count)
+      self.class.store_class.new(count, @top_dir_pn.to_s, @pathn.to_s, @relative_pathn.to_s,
+                                 @basename.to_s, @extname.to_s, @category.to_s, @kind, @valid_ext, @icon_size)
     end
 
     def determine_hier(pattern, kx1, _kx2, kx3)
