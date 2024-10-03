@@ -360,10 +360,3 @@ Style/SymbolProc:
   Exclude:
     #- 'lib/cpiconfiles/csvdata.rb'
     #- 'lib/cpiconfiles/iconfilegroup.rb'
-
-# Offense count: 1
-# This cop supports safe autocorrection (--autocorrect).
-# Configuration parameters: AllowHeredoc, AllowURI, URISchemes, IgnoreCopDirectives, AllowedPatterns.
-# URISchemes: http, https
-Layout/LineLength:
-  Max: 121
