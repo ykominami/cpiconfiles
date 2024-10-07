@@ -95,14 +95,6 @@ module Cpiconfiles
       @l2s = make_uniq_field('l2')
       # @category = @paths.parent.basename('.*').to_s
       @categories = make_uniq_field('category')
-
-      # p @paths
-#      p @paths
-#      p "==="
-      # @categories = @paths.map{ |path| Pathname.new(path).parent.basename('.*').to_s }.uniq
-# p @categories
-
-#      @categories = make_uniq_field('category')
     end
 
     def make_uniq_field(name)
@@ -115,68 +107,8 @@ module Cpiconfiles
       create_csvdata(list)
     end
 
-    def print_l1
-      @l1s.each do |l1|
-        p "l1=#{l1}"
-        findx('l1', l1).sort_by(&:l2).each do |item|
-          p item.path
-        end
-      end
-    end
-
     def create_csvdata(obj)
       CvsdatAarray.new(obj).set_csvdata(self)
-    end
-
-    def print_l1_icon_size
-      count = 0
-      @l1s.each do |l1|
-        list = findx('l1', l1)
-        next unless count.zero? && list.size > 10
-
-        count += 1
-        p "l1=#{l1}"
-        category_list = list.map(&:category).uniq
-        category_list.each do |cate|
-          list.findx('category', cate).sort_by(&:l2).each do |item|
-            p "#{item.path} #{item.l2} #{item.icon_size}"
-          end
-        end
-      end
-    end
-
-    def print2
-      count = 0
-      @l1s.each do |l1|
-        list = findx('l1', l1)
-        next unless count.zero? && list.size > 10
-        break if count > 0
-
-        count += 1
-        category_list = list.map(&:category).uniq
-        # p "category_list=#{category_list}"
-        p "category_list=#{category_list[1]}"
-        break
-=begin 
-        category_list.each do |cate|
-          list.findx('category', cate).sort_by(&:l2).each do |item|
-            p "#{item.path} #{item.l2} #{item.icon_size}"
-          end
-        end
-=end
-      end
-    end
-
-    def print_l2
-      @l2s.each do |l2|
-        p "l2=#{l2}"
-        list = findx('l2', l2)
-        next unless list.size > 10
-
-        list.sort_by(&:l1).each do |item|
-          p item.path
-        end
-      end
     end
   end
 end
