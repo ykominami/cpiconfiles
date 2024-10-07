@@ -11,7 +11,7 @@ module Cpiconfiles
         # @save_array = []
 
         @load_hs = {}
-        @recove_hs = {}
+        @recover_hs = {}
         @restore_hs = {}
       end
 
@@ -19,42 +19,32 @@ module Cpiconfiles
         @data_hs[obj]
       end
 
-=begin
-      def to_h()
-        hash = {}
-        @save_hs.each do |key, val|
-          hash[key] = val.to_h
-        end
-        hash
-      end
-=end
       def add(obj)
         count = get_id_num(obj)
         if count == nil
-          # obj.set_idnum(count)
           count = @data_hs[obj] = @count
-          # raise
-          # obj["id_numn"] = count
           @data_array << obj
           store_obj = obj.save_to_obj(count)
-          p "count=#{count} store_obj=#{store_obj} obj.class=#{obj.class}"
           h = store_obj.to_h
           @save_hs[count] = h
-          # @save_array << h
           @count += 1
         end
         count
       end
 
       def load(id_num, obj)
-        p "load obj.id_num=#{id_num} obj=#{obj}"
-        raise if @load_hs[id_num] != nil
-        raise if obj.id_num != id_num
+        id_num_x = obj.id_num[:id_num]
+        raise NotFoundInRestorehsByIdError.new("yamlstore load 3 id_num=#{id_num}") if @restore_hs[id_num] != nil
+        raise NotEqualIdError.new("yamlstore load 4 id_num=#{id_num} obj.id_num=#{id_num_x}") if id_num_x != id_num
         @restore_hs[id_num] = obj
       end
 
       def recover(id_num)
         obj = @restore_hs[id_num]
+        @recover_hs[id_num] = obj.dup.class.recover(obj)
+      end
+
+      def set_recover(id_num, obj)
         @recover_hs[id_num] = obj.dup.class.recover(obj)
       end
 
@@ -91,14 +81,11 @@ module Cpiconfiles
 
     class << self
       def get_id_num_base(key, value)
-        raise if value.class != @klass[key]
+        raise DifferentClassError if value.class != @klass[key]
         @item_hs[key].get_id_num(value)
       end
 
       def add_base(key, value)
-        p "value.class=#{value.class}"
-        p "klass[key]=#{@klass[key]}"
-        # raise if value.class != @klass[key]
         @item_hs[key].add(value)
       end
 
@@ -126,7 +113,7 @@ module Cpiconfiles
         @item_hs[key].set_recover(id_num, value)
       end
 
-      def get_recover_base(key, id_num)
+      def set_recover_base(key, id_num)
         @item_hs[key].set_recover(id_num)
       end
       #
@@ -152,7 +139,25 @@ module Cpiconfiles
 
       #
       def load_base(key, id_num, obj)
-        @item_hs[key].load(id_num,obj)
+        begin
+          @item_hs[key].load(id_num , obj)
+        rescue => exc
+          puts "exc.message=#{exc.message}"
+          puts "key=#{key} id_num=#{id_num}"
+          exc.backtrace.map{|x| puts "#{x}\n"}
+          exit
+        end
+      end
+
+      def load_hs(key, id_num)
+        begin
+          @item_hs[key].load
+        rescue => exc
+          puts "exc.message=#{exc.message}"
+          puts "key=#{key} id_num=#{id_num}"
+          exc.backtrace.map{|x| puts "#{x}\n"}
+          exit
+        end
       end
 
       def load_iconfilegroup(id_num, obj)
@@ -223,18 +228,10 @@ module Cpiconfiles
           "iconfile" => @item_hs[:iconfile].save_hs,
           "iconlist" => @item_hs[:iconlist].save_hs
         }
-        #raise if obj["iconfilegroup"].size.zero?
-        # raise if obj["iconfilesubgroup"].size.zero?
-        raise if obj["iconfile"].size.zero?
-        raise if obj["iconlist"].size.zero?
+        raise NotFoundIconfileError.new("yamlstore save 1") if obj["iconfile"].size.zero?
+        raise NotFoundIconlistError.new("yamlstore save 2")  if obj["iconlist"].size.zero?
         content = YAML.dump(obj)
         File.write(fname, content)
-        p @item_hs[:iconfile].save_hs
-        p 'obj["iconlist"]='
-        p obj["iconlist"]
-        p "============="
-        p YAML.dump(obj["iconlist"])
-        p "============="
         xobj = obj["iconlist"].to_h
         File.write("ax.yml", YAML.dump(xobj) )
       end
@@ -242,16 +239,10 @@ module Cpiconfiles
       def loadx_sub(obj, keyx, klass, var_name_part)
         hs = obj[keyx.to_s]
         hs.each do |key, val|
-          p "key=#{key} val.class=#{val.class} val=#{val}"
-          # x = klass.make(**val)
           x = klass.make_store(val)
-          # x.class.load_from_obj(x)
           load_base(keyx, key, x)
         end
-        # num_of_icfg = num_of_iconfilegroup()
         num = num_of_base(keyx)
-        p "num_of_#{var_name_part}=#{num}"
-        p ""
       end
 
       def loadx(obj)
@@ -261,53 +252,19 @@ module Cpiconfiles
         loadx_sub(obj, :iconlist, Iconlist, "icl")
       end
 
-      def print_hash(hash)
-        hash.each do |key, val|
-          p "key=#{key}"
-          p "val=#{val}"
-        end
-      end
-
       def restorex_sub(keyx)
         load_hs = get_restore_hs_base(keyx)
-        print_hash(load_hs)
       end
 
-
-      def restorex(obj, dump_fname, sizepat)
-        @sizepat = sizepat
-        p "Yamlstore.restore 1"
+      def restorex
         keyx = :iconfile
         restorex_sub(keyx)
-        p ""
 
-        p "Yamlstore.restore 2"
         keyx = :iconfilesubgroup
         restorex_sub(keyx)
-        p ""
 
-        p "Yamlstore.restore 3"
         keyx = :iconfilegroup
         restorex_sub(keyx)
-        p ""
-      end
-
-      def restore(obj, dump_fname, sizepat)
-        p "Yamlstore.restore 1"
-        @sizepat = sizepat
-        p "Yamlstore.restore 2"
-        icf_hs = Iconfile.restore(obj["iconfile"], @sizepat)
-        restore_iconfile(icf_hs)
-        p "Yamlstore.restore 3"
-        icfg_hs = Iconfilesubgroup.restore(obj["iconfilesubgroup"], @sizepat)
-        restore_iconfilesubgroup(icfg_hs)
-        p "Yamlstore.restore 4"
-        icfsg_hs = Iconfilegroup.restore(obj["iconfilegroup"], @sizepat)
-        restore_iconfilegroup(icfsg_hs)
-        p "Yamlstore.restore 5"
-        icl_hs = Iconlist.restore(obj["iconlist"], dump_fname, @sizepat)
-        restore_iconlist(icl_hs)
-        p "Yamlstore.restore 6"
       end
     end
   end
