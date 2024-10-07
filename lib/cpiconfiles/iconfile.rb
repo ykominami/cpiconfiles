@@ -17,7 +17,6 @@ module Cpiconfiles
 
     # @valid_exts = [:PNG, :JPG, :JPEG, :GIF, :SVG]
     @valid_exts = [:PNG, :GIF, :SVG]
-    @sizepat = Sizepattern.new
 
     class << @store_class
       define_method(:recover) do
@@ -58,14 +57,7 @@ module Cpiconfiles
 
         # Loggerxcm.debug "ret=#{ret}"
       end
-=begin
-      def create(value, sizepat)
-        s_inst = @store_class.new(**value)
-        top_dir_pn = Pathname.new(s_inst.top_dir)
-        pathn = Pathname.new(s_inst.path)
-        new(top_dir_pn, pathn, sizepat)
-      end
-=end
+
       def restore(hash, sizepat)
         obj_hs = {}
         hash.each do |value|
@@ -88,7 +80,7 @@ module Cpiconfiles
       @head_str = nil
       @tail_str = nil
       @str_reason = nil
-      #
+      raise UnspecifiedTopDirError.new("Iconfile new top_dir_pn=#{top_dir_pn}") if top_dir_pn.nil?
       @top_dir_pn = top_dir_pn
       raise NotPathnameClassError unless pathn.instance_of?(Pathname)
       @pathn = pathn
