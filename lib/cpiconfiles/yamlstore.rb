@@ -233,7 +233,6 @@ module Cpiconfiles
         content = YAML.dump(obj)
         File.write(fname, content)
         xobj = obj["iconlist"].to_h
-        File.write("ax.yml", YAML.dump(xobj) )
       end
 
       def loadx_sub(obj, keyx, klass, var_name_part)

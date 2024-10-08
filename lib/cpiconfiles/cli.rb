@@ -6,25 +6,15 @@ module Cpiconfiles
       Loggerxcm.log_init(log_level)
       @sizepat = Sizepattern.new
       # Appenv.sizepattern = @sizepat
-      @defalut_dump_filename = 'cpiconfiles.dump'
 
       @top_dir_pn = nil
-      @output_fname = ''
-      @dump_fname = ''
       @csv_fname = ''
-
-      @dump_load_result = nil
     end
 
-    def set_vars(top_dir_pn: nil, output_fname: '', dump_fname: '',
-                 csv_fname: '')
+    def set_vars(top_dir_pn: nil, csv_fname: '')
       raise UnspecifiedTopDirError.new( "Cli set_vars top_dir_pn=#{top_dir_pn}" ) if top_dir_pn.nil?
       @top_dir_pn = top_dir_pn
-      @output_fname = output_fname
-      @dump_fname = dump_fname
       @csv_fname = csv_fname
-
-      Appenv.set_dump_file(dump_fname: @dump_fname)
     end
 
     def setup
@@ -60,8 +50,14 @@ module Cpiconfiles
       iconlist.analyze
 
       iconlist.save_as_csv(@csv_fname) if !@csv_fname.nil? && @csv_fname.strip.size.positive?
-      iconlist.dump
+      # iconlist.dump
       iconlist
+    end
+
+    def yaml
+      iconlist = execute_body
+      # store_inst = iconlist.save_to_obj(-1)
+      Yamlstore.add_iconlist(iconlist)
     end
 
     def json
@@ -69,12 +65,7 @@ module Cpiconfiles
       iconlist.json
     end
 
-    def yaml
-      iconlist = execute_body
-      store_inst = iconlist.save_to_obj(-1)
-      Yamlstore.add_iconlist(iconlist)
-    end
-
+=begin
     def restore(obj)
       Yamlstore.restore(obj, @sizepat)
       iconlist = setup
@@ -99,5 +90,6 @@ module Cpiconfiles
       iconlist.print_l1_icon_size
       iconlist.print_l2
     end
+=end
   end
 end
