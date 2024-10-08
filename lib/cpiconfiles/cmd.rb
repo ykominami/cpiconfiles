@@ -1,3 +1,5 @@
+require 'fileutils'
+
 module Cpiconfiles
   class Cmd < Thor
     class << self
@@ -10,22 +12,27 @@ module Cpiconfiles
     # 指定ファイル群をコピー
     option :d, banner: '<dump_fname>'
     option :dont_use_dump_file, aliases: "-x", default: false, type: :boolean, banner: '-x'
-    option :o, banner: '<output_fname>'
-    option :c, banner: '<csv_fname>'
+    option :o, required: false, desc: 'output_dir'
     desc 'cp2 <top_dir>', 'copy icon files'
     def cp2(top_dir)
       @top_dir_pn = Pathname.new(top_dir).expand_path
       @dump_fname = options[:d]
-      @output_fname = options[:o]
+      @output_dir = options[:o]
       # 指定されなければ値はnil
       # 指定されていれば、csvファイルに出力
-      @csv_fname = options[:c]
-
+      if @output_dir.nil? || @output_dir.strip.empty?
+        @output_dir = "./_output"
+      end
+      @output_dir_pn = Pathname.new(@output_dir).expand_path
+      if @output_dir_pn.exist?
+        FileUtils.rm_r(Dir.glob(@output_dir_pn.to_s + "/*")) 
+      else
+        @output_dir_pn.mkpath
+      end
       cli = Cli.new
-      cli.set_vars(top_dir: @top_dir_pn, dump_fname: @dump_fname, 
-                  output_fname: @output_fname, csv_fname: @csv_fname)
-      #      cli.print
-      cli.print2
+      cli.set_vars(top_dir_pn: @top_dir_pn, csv_fname: @csv_fname)
+      cli.copy_to(@output_dir_pn)
+
     end
 
     desc 'yaml <top_dir>', 'create a list of all icon files in the subdirectories of a specified directory'

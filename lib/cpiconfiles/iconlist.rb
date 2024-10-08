@@ -120,7 +120,7 @@ module Cpiconfiles
 
     def load
       @state = :IN_LOAD
-      ret , @iconfilegroup = Appenv.dump_file.load
+      ret , @iconfilegroup = Appenv.dump_file.load unless Appenv.dump_file.nil?
       @dump_load_result = ret
       ret
     end
@@ -152,6 +152,13 @@ module Cpiconfiles
 
     def yaml
       YAML.dump(@iconfilegroups)
+    end
+
+    def copy_to(output_dir_pn)
+      @iconfilegroups.each do |key, ifg|
+        raise NotInstanceOfIconfilegroupError.new("ifg.class=#{ifg.class}") unless ifg.instance_of?(Cpiconfiles::Iconfilegroup)
+        ifg.copy_to(output_dir_pn)
+      end
     end
   end
 end

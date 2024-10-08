@@ -11,6 +11,15 @@ module Cpiconfiles
       @csv_fname = ''
     end
 
+    def copy_to(output_dir_pn)
+      iconlist = execute_body
+      iconlist.copy_to(output_dir_pn)
+    end
+
+    def clean_and_ensure_dir(dir_pn)
+
+    end
+
     def set_vars(top_dir_pn: nil, csv_fname: '')
       raise UnspecifiedTopDirError.new( "Cli set_vars top_dir_pn=#{top_dir_pn}" ) if top_dir_pn.nil?
       @top_dir_pn = top_dir_pn
@@ -65,19 +74,6 @@ module Cpiconfiles
       iconlist.json
     end
 
-=begin
-    def restore(obj)
-      Yamlstore.restore(obj, @sizepat)
-      iconlist = setup
-      iconlist.restore
-      iconlist.print2
-    end
-
-    def print2
-      iconlist = execute_body
-      iconlist.print2
-    end
-
     def print
       iconlist = execute_body
       # exit
@@ -89,6 +85,19 @@ module Cpiconfiles
       iconlist.print_l1
       iconlist.print_l1_icon_size
       iconlist.print_l2
+    end
+
+    def print2
+      iconlist = execute_body
+      iconlist.print2
+    end
+
+=begin
+    def restore(obj)
+      Yamlstore.restore(obj, @sizepat)
+      iconlist = setup
+      iconlist.restore
+      iconlist.print2
     end
 =end
   end
