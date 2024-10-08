@@ -150,5 +150,17 @@ module Cpiconfiles
       @min_icon_size = @icon_size_list[0]
       @icon_size_list_size = @icon_size_list.size
     end
+
+    def print
+      Loggerxcm.debug "Iconfilesubgroup #{@id_num} #{@category} #{@l1} #{@l2} #{@icon_size_list_size} #{@num_of_iconfiles} #{@min_icon_size} #{@max_icon_size}"
+    end
+
+    def print_l1
+      p "l1=#{@l1}"
+    end
+
+    def print_l2
+      p "l2=#{@l2}"
+    end
   end
 end

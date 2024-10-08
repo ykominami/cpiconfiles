@@ -120,8 +120,7 @@ module Cpiconfiles
         iconfilesubgroups_by_icon_size_range = {}
         @iconfilesubgroups_by_icon_size_range.each do |key, icfsg_array|
           key_str = key.join('|')
-          iconfilesubgroups_by_icon_size_range[key_str] = icfsg_array.map{ |icfsg|@foo = 1
-          for @foo in 1..10 do end
+          iconfilesubgroups_by_icon_size_range[key_str] = icfsg_array.map{ |icfsg|
             # icfsg.save_to_obj
             Yamlstore.add_iconfilesubgroup(icfsg)
           }
@@ -262,6 +261,79 @@ module Cpiconfiles
     def to_json
       @iconfilesubgroups.each do |key, ifsg|
         ifsg.to_json
+      end
+    end
+
+    def copy_to(output_dir_pn)
+      @iconfilesubgroups_by_icon_size_range.each do |key, value|
+        value.each do |ifsg|
+          dest_pn = (output_dir_pn + ifsg.category)
+          dest_pn.mkpath
+          ifsg.iconfiles.each do |icf|
+            FileUtils.copy(icf.pathn, dest_pn)
+          end
+        end
+      end
+    end
+
+    def print
+      @iconfilesubgroups.each do |key, ifsg|
+        ifsg.print
+      end
+    end
+
+    def print_l1
+      p "@iconfilesubgroups #{@iconfilesubgroups}"
+      @iconfilesubgroups.each do |key, ifsg|
+        ifsg.print_l1
+      end
+    end
+
+    def print_l1_icon_size
+      iconfiles_by_icon_size.each do |key, value|
+        p "icon_size=#{key} value.size=#{value.size}"
+      end
+    end
+
+    def print2
+      @iconfilesubgroups_by_icon_size.each do |key, value|
+        p "@iconfilesubgroups_by_icon_size key=#{key} value.size=#{value.size}"
+        value.each do |ifsg|
+          p "###==== S"
+          p "ifsg.id_num=#{ifsg.id_num}"
+          p "ifsg.category=#{ifsg.category}"
+          p "ifsg.icon_size_list=#{ifsg.icon_size_list}"
+          p "ifsg.max_icon_size=#{ifsg.max_icon_size}"
+          p "ifsg.min_icon_size=#{ifsg.min_icon_size}"
+          ifsg.iconfiles.each do |icf|
+            p "icf.pathn=#{icf.pathn}"
+          end
+          p "ifsg.num_of_iconfiles=#{ifsg.num_of_iconfiles}"
+          p "ifsg.icon_size_list_size=#{ifsg.icon_size_list_size}"
+          p "###==== E"
+          p ""
+        end
+        p "#####"
+      end
+      #
+      @iconfilesubgroups_by_icon_size_range.each do |key, value|
+        p "@iconfilesubgroups_by_icon_size_range key=#{key} value.size=#{value.size}"
+        value.each do |ifsg|
+          p "ifsg.icon_size_list=#{ifsg.icon_size_list}"
+
+        end
+        p "===="
+      end
+    end
+
+    def print_l2
+      p "iconfilesubgroups_by_icon_size_range #{@iconfilesubgroups_by_icon_size_range}"
+    end
+
+    def print_l2_icon_size
+      p "==================== print_l2_icon_size"
+      @iconfilesubgroups_by_icon_size.each do |key, value|
+        p "key=#{key} value.size=#{value.size}"
       end
     end
   end
