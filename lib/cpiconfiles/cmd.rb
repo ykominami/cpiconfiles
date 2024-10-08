@@ -28,16 +28,17 @@ module Cpiconfiles
       cli.print2
     end
 
-    desc 'yaml', 'create a list of all icon files in the subdirectories of a specified directory'
+    desc 'yaml <top_dir>', 'create a list of all icon files in the subdirectories of a specified directory'
     option :o, required: true, desc: 'output_filename'
     option :d, required: false, desc: 'dump_filename'
-    option :c, required: false, desc: 'output_fname'
+    option :c, required: false, desc: 'csv_fname'
     option :adont, aliases: "-x", default: false, type: :boolean, desc: 'dont use dump file'
     def yaml(top_dir)
       @top_dir_pn = Pathname.new(top_dir).expand_path
+      @csv_fname = options[:c]
+
       @dump_fname = options[:d] ? options[:d] : ""
       @output_fname = options[:o]
-      @csv_fname = options[:c]
       @dont_use_dump_file = options[:x]
       @adont= options[:adont]
       Appenv.set_dump_file(dump_fname: @dump_fname,
@@ -76,24 +77,21 @@ module Cpiconfiles
     desc 'json', 'create a list of all icon files in the subdirectories of a specified directory'
     option :o, required: true, desc: 'output_filename'
     option :d, required: false, desc: 'dump_filename'
-    # option :c, required: false, desc: 'output_fname'
     option :adont, aliases: "-x", default: false, type: :boolean, desc: 'dont use dump file'
-    # option :d, banner: '<dump_fname>'
-    # option :o, banner: '<output_fname>'
-    # option :c, banner: '<csv_fname>'
-    option :dont_use_dump_file, aliases: "-x", type: :boolean, banner: ''
     desc 'json <top_dir>', 'copy icon files'
     def json(top_dir)
-      p "top_dir=#{top_dir}"
-
       @top_dir_pn = Pathname.new(top_dir).expand_path
       @output_fname = options[:o]
       @dump_fname = options[:d]
+      @dont_use_dump_file = options[:x]
+      @adont= options[:adont]
+      Appenv.set_dump_file(dump_fname: @dump_fname,
+               dont_use_dump_file: @adont)
 
       cli = Cli.new
-      cli.set_vars(top_dir_pn: @top_dir_pn, dump_fname: @dump_fname)
+      cli.set_vars(top_dir_pn: @top_dir_pn)
       #
-      File.write(@dump_fname , cli.json) unless @dump_fname.nil?
+      File.write(@output_fname , cli.json)
     end
 
     # jsonコマンドの出力を解析(JSONファイルを入力)
