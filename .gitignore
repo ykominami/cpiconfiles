@@ -1,3 +1,5 @@
+.env
+client*.json
 /_output
 /.bundle/
 /.yardoc

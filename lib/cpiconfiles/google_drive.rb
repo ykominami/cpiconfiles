@@ -2,6 +2,7 @@ require 'google/apis/drive_v3'
 require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'fileutils'
+require 'dotenv/load'
 
 module Cpiconfiles
   class GoogleDrive
@@ -20,6 +21,8 @@ module Cpiconfiles
 
     def initialize
       ##
+
+      ##
       # Ensure valid credentials, either by restoring from the saved credentials
       # files or initiating an OAuth2 authorization. If authorization is required,
       # the user's default browser will be launched to approve the request.
@@ -32,7 +35,7 @@ module Cpiconfiles
       @service.authorization = authorize
     end
 
-    def authorize
+    def authorize1
       client_id = Google::Auth::ClientId.from_file(CREDENTIALS_PATH)
       token_store = Google::Auth::Stores::FileTokenStore.new(file: TOKEN_PATH)
       authorizer = Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
@@ -40,12 +43,23 @@ module Cpiconfiles
       credentials = authorizer.get_credentials(user_id)
       if credentials.nil?
         url = authorizer.get_authorization_url(base_url: OOB_URI)
-        code = gets
+        puts "Open the following URL in the browser ( #{url} ) and enter the "
+        code = STDIN.gets
         credentials = authorizer.get_and_store_credentials_from_code(
-          user_id:, code:, base_url: OOB_URI
+          user_id: user_id, code: code, base_url: OOB_URI
         )
       end
       credentials
+    end
+
+    def authorize2
+      sio = StringIO.new({client_email: ENV['GOOGLE_CLIENT_EMAIL_FOR_GA'], private_key: ENV['GOOGLE_PRIVATE_KEY_FOR_GA'].gsub(/\\n/, "\n")}.to_json)
+      auth = ::Google::Auth::ServiceAccountCredentials.make_creds(scope: 'https://www.googleapis.com/auth/analytics', json_key_io: sio)
+    end
+
+    def authorize
+      # authorize1
+      authorize2
     end
 
     def upload(file_path)
@@ -55,7 +69,7 @@ module Cpiconfiles
       # file_path = 'path/to/file/report.csv'
 
       # Upload the file
-      result = service.create_file(metadata, upload_source: file_path, content_type: 'text/csv')
+      result = @service.create_file(metadata, upload_source: file_path, content_type: 'text/csv')
     end
   end
 end

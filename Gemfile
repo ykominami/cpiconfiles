@@ -5,6 +5,7 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in cpiconfiles.gemspec
 gemspec
 
+gem 'dotenv'
 gem 'google-api-client'
 gem 'loggerx', '~> 0.2.0'
 gem 'rake', '~> 13.0'
