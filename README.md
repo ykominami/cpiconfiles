@@ -18,6 +18,16 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
+    $ bundle exec ruby bin/cmd  yaml "top_dir" -o ”YAMLファイル”
+    指定ディレクトリ下のアイコンファイルの一覧をYAML形式で出力する
+
+    $ bundle exec ruby bin/cmd  yaml "top_dir" -o ”JSONファイル”
+    指定ディレクトリ下のアイコンファイルの一覧をJSON形式で出力する
+
+    $ bundle exec ruby bin/cmd  fyaml "top_dir" - a5.yml
+
+    bundle exec ruby bin/cmd gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+
 TODO: Write usage instructions here
 
 ## Development

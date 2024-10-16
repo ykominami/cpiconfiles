@@ -2,19 +2,14 @@ module Cpiconfiles
   # TODO: class Iconfilegroupを実装する
   class Iconfilegroup
     @store_class = Struct.new("IconfilegroupSave", 
-      :id_numn,
+      :id_num,
       :top_dir, :parent, 
       :iconfiles_hs, :iconfiles_by_icon_size,
       :iconfilesubgroups, :iconfilesubgroups_by_icon_size,
       :iconfilesubgroups_by_icon_size_range)
 
       @store_idnum_class = Struct.new("IconfilegroupSaveIdnum", :idnum)
-
     class << @store_class
-      define_method(:load_from_obj) do
-        p inst[:iconfiles_hs]
-      end
-
       define_method(:to_h) do
         hash = {}
         hash["id_num"] = @id_num
@@ -42,14 +37,7 @@ module Cpiconfiles
       def make_store(value)
         @store_class.new(value)
       end
-=begin
-      def create(value, sizepat)
-        s_inst = @store_class.new(**value)
-        top_dir_pn = Pathname.new(s_inst.top_dir)
-        parent_pn = Pathname.new(s_inst.parent)
-        new(top_dir_pn, parent_pn, sizepat)
-      end
-=end
+
       def restore(hash, sizepat)
         obj_hs = {}
         hash.each do |key, value|
@@ -67,25 +55,28 @@ module Cpiconfiles
     :iconfilesubgroups, :iconfilesubgroups_by_icon_size,
     :iconfilesubgroups_by_icon_size_range
     def initialize(top_dir_pn, parent_pn, sizepat)
+      raise UnspecifiedTopDirError.new("Iconfilegroup top_dir_pn=#{top_dir_pn}") if top_dir_pn.nil?
       @top_dir_pn = top_dir_pn
       @parent_pn = parent_pn
       @sizepat = sizepat
       @iconfiles = []
+
       @iconfiles_hs = {}
       @iconfiles_by_icon_size = {}
       @iconfilesubgroups = {}
-
       @iconfilesubgroups_by_icon_size = {}
       @iconfilesubgroups_by_icon_size_range = {}
     end
 
-
     def make(count)
       self.class.store_class.new(
         count,
-        @top_dir_pn.to_s, @parent_pn.to_s,
-        @iconfiles_hs, @iconfiles_by_icon_size,
-        @iconfilesubgroups, @iconfilesubgroups_by_icon_size,
+        @top_dir_pn.to_s,
+        @parent_pn.to_s,
+        @iconfiles_hs,
+        @iconfiles_by_icon_size,
+        @iconfilesubgroups,
+        @iconfilesubgroups_by_icon_size,
         @iconfilesubgroups_by_icon_size_range)
     end
 
@@ -102,31 +93,24 @@ module Cpiconfiles
     end
 
     def save_to_obj(id_num)
-        p "################### Iconfilegroup#save_to_obj 0"
         iconfiles_hs = {}
         @iconfiles_hs.each_with_object({}) { |(key, icf_array), iconfiles_hs|
             iconfiles_hs[key.to_s] = icf_array.map{ |icf|
             Yamlstore.add_base(:iconfile, icf)
           }
         }
-        p "################### Iconfilegroup#save_to_obj 1"
         iconfiles_by_icon_size = {}
         @iconfiles_by_icon_size.each do |key, icf_array|
           iconfiles_by_icon_size[key] = icf_array.map{ |icf| 
             Yamlstore.add_iconfile(icf)
           }
         end
-        p "################### Iconfilegroup#save_to_obj 2"
         iconfilesubgroups = {}
-        # @iconfilesubgroups.keyssize
-        p "@iconfilesubgroups=#{@iconfilesubgroups}"
         @iconfilesubgroups.each do |key, icfsg|
           key_str = key.join('|')
-          p "------ key_str=#{key_str}"
           # icfsg.save_to_obj()
           iconfilesubgroups[key_str] = Yamlstore.add_iconfilesubgroup(icfsg)
         end
-        p "################### Iconfilegroup#save_to_obj 3"
         iconfilesubgroups_by_icon_size = {}
         @iconfilesubgroups_by_icon_size.each do |key, icfsg_array|
             iconfilesubgroups_by_icon_size[key] = icfsg_array.map{ |icfsg|
@@ -151,7 +135,6 @@ module Cpiconfiles
     end
 
     def setup_for_iconfiles
-      # p "#############  Iconfilegroup setup_for_iconfiles S"
       @base_pns = make_uniq_field("base_pn")
       @basenames = make_uniq_field("basename")
       @extnames = make_uniq_field("extname")
@@ -191,9 +174,8 @@ module Cpiconfiles
     def collect_sub(dir_pn, parent_sizeddir = nil)
       return [] unless dir_pn
 
-      # @top_dir_pn = top_dir_pn
       icon_files = []
-      # Loggerxcm.debug  "dir_pn~#{dir_pn}"
+      Loggerxcm.debug  "dir_pn~#{dir_pn}"
       dir_pn.children.each do |pn|
         next unless pn
 
@@ -238,10 +220,10 @@ module Cpiconfiles
 
     def analyze
       items = {}
-      p "Iconfilegroup#analyze @iconfiles_hs=#{@iconfiles_hs}"
 
-      @iconfiles_hs.each do |key, list|
-        p "Iconfilegroup#analyze key=#{key} list.size=#{list.size}"
+      @iconfiles_hs.each_with_index do |k_v, index|
+        key = k_v[0]
+        list = k_v[1]
         category, l1, l2 = key
         if category
           items[category] ||= {}
@@ -264,7 +246,7 @@ module Cpiconfiles
         end
 
         ifsg = @iconfilesubgroups[key]
-        ifsg = Iconfilesubgroup.new(category, l1, l2) unless ifsg
+        ifsg = Iconfilesubgroup.new(index, category, l1, l2) unless ifsg
         list.map { |icfile| ifsg.add(icfile) }
         ifsg.post_process
         @iconfilesubgroups[key] = ifsg
@@ -273,16 +255,6 @@ module Cpiconfiles
         key = [ifsg.min_icon_size, ifsg.max_icon_size]
         @iconfilesubgroups_by_icon_size_range[key] ||= []
         @iconfilesubgroups_by_icon_size_range[key] << ifsg
-
-        p "@iconfilesubgroups.keys=#{@iconfilesubgroups.keys}"
-      end
-      p "@iconfilesubgroups.keyssize=#{@iconfilesubgroups.keys.size}"
-
-    end
-
-    def print
-      @iconfiles.map do |icf|
-        Loggerxcm.debug icf.pathn.to_s
       end
     end
 
@@ -292,78 +264,76 @@ module Cpiconfiles
       end
     end
 
-    def print2
-      @iconfilesubgroups.each do |key, item| category, l1, l2 = key
-        
- # p "#{item.path} #{item.l2} #{item.icon_size}"
-        p "#{item.category} #{item.l1} #{item.l2} #{item.num_of_iconfiles}"       end
-      p "===="
-      @iconfilesubgroups_by_icon_size.each do |key, list|
-        p "key=#{key} list.size=#{list.size}"
-      end
-      p "===="
-      @iconfilesubgroups_by_icon_size_range.each do |key, list|
-        p "key=#{key} range_size=#{list.first.icon_size_list.size} list.size=#{list.size}"
-      end
-      p "===="
-      @iconfiles_by_icon_size.each do |key, list|
-        p "icon_size=#{key} list.size=#{list.size}"
-      end
-      p "===="
-      icon_size = 16
-      findx("min_icon_size", icon_size, @iconfilesubgroups.values)
-        .findx("icon_size_list_size", 5)
-        .sort_by(&:l1)
-        .sort_by(&:l2)
-        .each do |item|
-        p "#{item.category} #{item.l1} #{item.l2} #{item.icon_size_list_size} | #{item.icon_size_list}"
-      end
-      p "===="
-      icon_size_list_size = 5
-      listx = findx("icon_size_list_size", icon_size_list_size, @iconfilesubgroups.values)
-        .sort_by(&:l1)
-      p "listx.size=#{listx.size}"
-
-      listx.each do |item|
-        #        p "#{item.category}/#{item.l1}/#{item.l2} #{item.icon_size_list_size} | #{item.icon_size_list} | #{item.iconfiles[0].path}"
-        p "#{item.category}/#{item.l1}/#{item.l2} #{item.icon_size_list_size} | #{item.icon_size_list}"
-      end
-    end
-
-    def print_l1
-      @l1s.each do |l1|
-        p "l1=#{l1}"
-        findx("l1", l1).sort_by(&:l2).each do |item|
-          p item.path
-        end
-      end
-    end
-
-    def print_l1_icon_size
-      count = 0
-      @l1s.each do |l1|
-        list = findx("l1", l1)
-        next unless count.zero? && list.size > 10
-
-        count += 1
-        category_list = list.map(&:category).uniq
-        category_list.each do |cate|
-          list.findx("category", cate).sort_by(&:l2).each do |item|
-            p "#{item.path} #{item.l2} #{item.num_of_iconfiles}"
+    def copy_to(output_dir_pn)
+      @iconfilesubgroups_by_icon_size_range.each do |key, value|
+        value.each do |ifsg|
+          dest_pn = (output_dir_pn + ifsg.category)
+          dest_pn.mkpath
+          ifsg.iconfiles.each do |icf|
+            FileUtils.copy(icf.pathn, dest_pn)
           end
         end
       end
     end
 
-    def print_l2
-      @l2s.each do |l2|
-        p "l2=#{l2}"
-        list = findx("l2", l2)
-        next unless list.size > 10
+    def print
+      @iconfilesubgroups.each do |key, ifsg|
+        ifsg.print
+      end
+    end
 
-        list.sort_by(&:l1).each do |item|
-          p item.path
+    def print_l1
+      p "@iconfilesubgroups #{@iconfilesubgroups}"
+      @iconfilesubgroups.each do |key, ifsg|
+        ifsg.print_l1
+      end
+    end
+
+    def print_l1_icon_size
+      iconfiles_by_icon_size.each do |key, value|
+        p "icon_size=#{key} value.size=#{value.size}"
+      end
+    end
+
+    def print2
+      @iconfilesubgroups_by_icon_size.each do |key, value|
+        p "@iconfilesubgroups_by_icon_size key=#{key} value.size=#{value.size}"
+        value.each do |ifsg|
+          p "###==== S"
+          p "ifsg.id_num=#{ifsg.id_num}"
+          p "ifsg.category=#{ifsg.category}"
+          p "ifsg.icon_size_list=#{ifsg.icon_size_list}"
+          p "ifsg.max_icon_size=#{ifsg.max_icon_size}"
+          p "ifsg.min_icon_size=#{ifsg.min_icon_size}"
+          ifsg.iconfiles.each do |icf|
+            p "icf.pathn=#{icf.pathn}"
+          end
+          p "ifsg.num_of_iconfiles=#{ifsg.num_of_iconfiles}"
+          p "ifsg.icon_size_list_size=#{ifsg.icon_size_list_size}"
+          p "###==== E"
+          p ""
         end
+        p "#####"
+      end
+      #
+      @iconfilesubgroups_by_icon_size_range.each do |key, value|
+        p "@iconfilesubgroups_by_icon_size_range key=#{key} value.size=#{value.size}"
+        value.each do |ifsg|
+          p "ifsg.icon_size_list=#{ifsg.icon_size_list}"
+
+        end
+        p "===="
+      end
+    end
+
+    def print_l2
+      p "iconfilesubgroups_by_icon_size_range #{@iconfilesubgroups_by_icon_size_range}"
+    end
+
+    def print_l2_icon_size
+      p "==================== print_l2_icon_size"
+      @iconfilesubgroups_by_icon_size.each do |key, value|
+        p "key=#{key} value.size=#{value.size}"
       end
     end
   end

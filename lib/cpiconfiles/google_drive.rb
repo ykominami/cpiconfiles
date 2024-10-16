@@ -40,8 +40,6 @@ module Cpiconfiles
       credentials = authorizer.get_credentials(user_id)
       if credentials.nil?
         url = authorizer.get_authorization_url(base_url: OOB_URI)
-        puts 'Open the following URL in the browser and enter the ' \
-             "resulting code after authorization:\n" + url
         code = gets
         credentials = authorizer.get_and_store_credentials_from_code(
           user_id:, code:, base_url: OOB_URI
@@ -58,7 +56,6 @@ module Cpiconfiles
 
       # Upload the file
       result = service.create_file(metadata, upload_source: file_path, content_type: 'text/csv')
-      puts "Uploaded file '#{result.name}' (#{result.id})"
     end
   end
 end

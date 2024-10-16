@@ -1,3 +1,4 @@
+/_output
 /.bundle/
 /.yardoc
 /_yardoc/
@@ -33,4 +34,6 @@ exe/a.rb
 exe/cpiconfiles
 extlist.txt
 #
+a*.csv
+a*.yaml
 

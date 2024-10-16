@@ -1,7 +1,7 @@
 module Cpiconfiles
   class Iconfilesubgroup
     @store_class = Struct.new('IconfilesubgroupSave',
-      :id_numn,
+      :id_num, :category,
       :l1, :l2, :icon_size_list,
       :max_icon_size, :min_icon_size, :iconfiles, 
       :num_of_iconfiles, :icon_size_list_size,
@@ -17,6 +17,7 @@ module Cpiconfiles
       define_method(:to_h) do
         hash = {}
         hash["id_num"] = @id_num
+        hash["category"] = @category
         hash["l1"] = @l1
         hash["l2"] = @l2
         hash["icon_size_list"] = @icon_size_list
@@ -50,7 +51,6 @@ module Cpiconfiles
       def restore(hash, sizepat)
         obj_hs = {}
         hash.each do |key, value|
-          # p value.keys
           inst = create( **value )
           inst.from_h(value)
           obj_hs[key] = inst
@@ -59,11 +59,12 @@ module Cpiconfiles
       end
     end
 
-    attr_reader :category, :l1, :l2, :icon_size_list, 
+    attr_reader :id_num, :category, :l1, :l2, :icon_size_list,
                 :max_icon_size, :min_icon_size, :iconfiles, 
                 :num_of_iconfiles, :icon_size_list_size,
                 :copied
-    def initialize(category, l1, l2)
+    def initialize(count, category, l1, l2)
+      @id_num = count
       @category = category
       @l1 = l1
       @l2 = l2
@@ -78,7 +79,7 @@ module Cpiconfiles
 
     def make(count)
       self.class.store_class.new(
-        count,
+        count, @category,
         @l1, @l2, @icon_size_list,
         @max_icon_size, @min_icon_size, @iconfiles,
         @num_of_iconfiles, @icon_size_list_size,
@@ -91,7 +92,6 @@ module Cpiconfiles
       @min_icon_size = hash[:min_icon_size]
       @icon_size_list_size = hash[:icon_size_list_size]
       @iconfiles = hash[:iconfiles].map{ |key, id_num|
-        # p %(#{key} #{id_num})
         id_num
       } 
       @num_of_iconfiles = hash[:num_of_iconfiles]
@@ -124,6 +124,7 @@ module Cpiconfiles
       end
 
       self.class.store_class.new(
+        @id_num,
         @category, 
         @l1, @l2, @icon_size_list,
 
@@ -148,6 +149,18 @@ module Cpiconfiles
       @max_icon_size = @icon_size_list[-1]
       @min_icon_size = @icon_size_list[0]
       @icon_size_list_size = @icon_size_list.size
+    end
+
+    def print
+      Loggerxcm.debug "Iconfilesubgroup #{@id_num} #{@category} #{@l1} #{@l2} #{@icon_size_list_size} #{@num_of_iconfiles} #{@min_icon_size} #{@max_icon_size}"
+    end
+
+    def print_l1
+      p "l1=#{@l1}"
+    end
+
+    def print_l2
+      p "l2=#{@l2}"
     end
   end
 end
