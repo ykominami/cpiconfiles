@@ -1,6 +1,9 @@
 .env
+/secret/
 client*.json
-/_output
+x3.csv
+xa.csv
+/_output/
 /.bundle/
 /.yardoc
 /_yardoc/

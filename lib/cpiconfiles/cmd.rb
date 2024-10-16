@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'date'
 
 module Cpiconfiles
   class Cmd < Thor
@@ -8,19 +9,25 @@ module Cpiconfiles
       end
     end
 
-    option :o, required: true, desc: 'output_filename'
-    desc 'csv <top_dir>', 'crate a list of icon files from a csv file'
+    option :o, required: false, desc: 'output_filename'
+    desc 'csv_upload <top_dir>', 'crate a list of icon files from a csv file'
     def csv_upload(top_dir)
       @top_dir_pn = Pathname.new(top_dir).expand_path
       @output_fname = options[:o]
+      @output_fname = "pciconfile.csv"
       @csv_file_pn = Pathname.new(@output_fname).expand_path
+
+      fname_in_gd_base = @csv_file_pn.basename(".*").to_s
+      dtstr=Time.now.strftime('%Y%m%d-%H%M%S')
+      fname_in_gd = "#{fname_in_gd_base}-#{dtstr}"
 
       cli = Cli.new
       cli.set_vars(top_dir_pn: @top_dir_pn, csv_pn: @csv_file_pn)
       cli.csv
 
-      gd = GoogleDrive.new
-      gd.upload(@csv_file_pn.to_s)
+      # gd = GoogleDrive.new
+      gd = GDrive.new
+      gd.upload(@csv_file_pn.to_s, fname_in_gd)
     end
 
     option :o, required: true, desc: 'output_filename'
@@ -109,8 +116,9 @@ p "@csv_file_pn=#{@csv_file_pn}"
       @adont= options[:adont]
       Appenv.set_dump_file(dump_fname: @dump_fname,
                dont_use_dump_file: @adont)
-      cli = Cli.new
-      cli.set_vars(top_dir_pn: @top_dir_pn, csv_fname: @csv_fname)
+      cli = Cli.new(@csv_fname)
+	  csv_pn = Pathname.new(@csv_fname)
+      cli.set_vars(top_dir_pn: @top_dir_pn, csv_pn: csv_pn)
       #
       cli.yaml
       Yamlstore.save(@output_fname)
@@ -119,6 +127,7 @@ p "@csv_file_pn=#{@csv_file_pn}"
     desc 'fyaml', 'crate a list of icon files from a specifed yaml file'
     option :o, required: true, desc: 'output_filename'
     def fyaml()
+      @csv_fname = options[:c]
       @output_fname = options[:o]
 
       obj = Yamlstore.load(@output_fname)

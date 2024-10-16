@@ -1,6 +1,6 @@
 module Cpiconfiles
   class Cli
-    def initialize
+    def initialize(csv_fname)
       # log_level = :debug
       log_level = :info
       Loggerxcm.log_init(log_level)
@@ -8,7 +8,7 @@ module Cpiconfiles
       # Appenv.sizepattern = @sizepat
 
       @top_dir_pn = nil
-      @csv_fname = ''
+      @csv_pn = Pathname.new(csv_fname)
     end
 
     def csv
@@ -25,7 +25,7 @@ module Cpiconfiles
     def set_vars(top_dir_pn: nil, csv_pn: nil)
       raise UnspecifiedTopDirError.new( "Cli set_vars top_dir_pn=#{top_dir_pn}" ) if top_dir_pn.nil?
       @top_dir_pn = top_dir_pn
-      @csv_pn = csv_pn
+      @csv_pn = csv_pn if csv_pn
     end
 
     def setup
@@ -66,8 +66,8 @@ module Cpiconfiles
 
     def yaml
       iconlist = execute_body
-      gd = GoogleDrive.new
-      gd.upload(iconlist.save_as_csv)
+      # gd = GoogleDrive.new
+      # gd.upload(iconlist.save_as_csv(@csv_pn))
 
       # store_inst = iconlist.save_to_obj(-1)
       Yamlstore.add_iconlist(iconlist)
