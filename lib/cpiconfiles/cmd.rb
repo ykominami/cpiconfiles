@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'date'
 
 module Cpiconfiles
   class Cmd < Thor
@@ -6,6 +7,71 @@ module Cpiconfiles
       def exit_on_failure?
         true
       end
+    end
+
+    option :o, required: false, desc: 'output_filename'
+    desc 'csv_upload <top_dir>', 'crate a list of icon files from a csv file'
+    def csv_upload(top_dir)
+      @top_dir_pn = Pathname.new(top_dir).expand_path
+      @output_fname = options[:o]
+      @output_fname = "pciconfile.csv"
+      @csv_file_pn = Pathname.new(@output_fname).expand_path
+
+      fname_in_gd_base = @csv_file_pn.basename(".*").to_s
+      dtstr=Time.now.strftime('%Y%m%d-%H%M%S')
+      fname_in_gd = "#{fname_in_gd_base}-#{dtstr}"
+
+      cli = Cli.new
+      cli.set_vars(top_dir_pn: @top_dir_pn, csv_pn: @csv_file_pn)
+      cli.csv
+
+      # gd = GoogleDrive.new
+      gd = GDrive.new
+      gd.upload(@csv_file_pn.to_s, fname_in_gd)
+    end
+
+    option :o, required: true, desc: 'output_filename'
+    desc 'csv <top_dir>', 'crate a list of icon files from a csv file'
+    def csv(top_dir)
+      @top_dir_pn = Pathname.new(top_dir).expand_path
+      @output_fname = options[:o]
+p "@output_fname=#{@output_fname}"
+      @csv_file_pn = Pathname.new(@output_fname).expand_path
+p "@csv_file_pn=#{@csv_file_pn}"
+
+      cli = Cli.new
+      cli.set_vars(top_dir_pn: @top_dir_pn, csv_pn: @csv_file_pn)
+      cli.csv
+    end
+
+    # Google Driveにcsvファイルをアップロード
+    option :i, required: false, desc: 'input_filename'
+    desc 'csv <top_dir>', 'crate a list of icon files from a csv file'
+    def csvi(top_dir)
+      @top_dir_pn = Pathname.new(top_dir).expand_path
+
+      @csv_file_pn = nil
+      @input_fname = options[:i]
+      @output_fname = options[:o]
+
+      @csv_file_pn = Pathname.new(@input_fname).expand_path if @input_fname.nil? || @input_fname.strip.empty?
+      if @csv_file_pn
+        csv_class = Struct.new('Csv', :kind, :icon_size, :category, :base, :path)
+
+        csv_pn = Pathname.new(csv_file).expand_path
+  
+        data = CSV.read(csv_pn.to_s)
+        rows = data.map { |row| csv_class.new(*row) }
+        csvdata = Csvdata.new(*rows)
+        csvdata.print2
+      else
+        @csv_file_pn = Pathname.new(@output_fname).expand_path if @output_fname.nil? || @output_fname.strip.empty?
+      end
+
+ 
+      # gd = GoogleDrive.new
+      # gd.upload(iconlist.save_as_csv)
+
     end
 
     #TODO: コピー機能の実装 
@@ -50,8 +116,9 @@ module Cpiconfiles
       @adont= options[:adont]
       Appenv.set_dump_file(dump_fname: @dump_fname,
                dont_use_dump_file: @adont)
-      cli = Cli.new
-      cli.set_vars(top_dir_pn: @top_dir_pn, csv_fname: @csv_fname)
+      cli = Cli.new(@csv_fname)
+	  csv_pn = Pathname.new(@csv_fname)
+      cli.set_vars(top_dir_pn: @top_dir_pn, csv_pn: csv_pn)
       #
       cli.yaml
       Yamlstore.save(@output_fname)
@@ -60,24 +127,12 @@ module Cpiconfiles
     desc 'fyaml', 'crate a list of icon files from a specifed yaml file'
     option :o, required: true, desc: 'output_filename'
     def fyaml()
+      @csv_fname = options[:c]
       @output_fname = options[:o]
 
       obj = Yamlstore.load(@output_fname)
       Yamlstore.loadx(obj)
       Yamlstore.restorex
-    end
-
-    desc 'csv', 'crate a list of icon files from a csv file'
-    option :i, required: true, desc: 'output_filename'
-    def csv0(csv_file)
-      csv_class = Struct.new('Csv', :kind, :icon_size, :category, :base, :path)
-
-      csv_pn = Pathname.new(csv_file).expand_path
-
-      data = CSV.read(csv_pn.to_s)
-      rows = data.map { |row| csv_class.new(*row) }
-      csvdata = Csvdata.new(*rows)
-      csvdata.print2
     end
 
     # 指定ディレクトリ下のアイコンファイルの一覧取得(JSONファイルに出力)

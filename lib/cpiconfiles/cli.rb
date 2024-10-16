@@ -1,6 +1,6 @@
 module Cpiconfiles
   class Cli
-    def initialize
+    def initialize(csv_fname)
       # log_level = :debug
       log_level = :info
       Loggerxcm.log_init(log_level)
@@ -8,7 +8,13 @@ module Cpiconfiles
       # Appenv.sizepattern = @sizepat
 
       @top_dir_pn = nil
-      @csv_fname = ''
+      @csv_pn = Pathname.new(csv_fname)
+    end
+
+    def csv
+      iconlist = execute_body
+      # p "@csv_pn=#{@csv_pn}"
+      iconlist.save_as_csv(@csv_pn)
     end
 
     def copy_to(output_dir_pn)
@@ -16,14 +22,10 @@ module Cpiconfiles
       iconlist.copy_to(output_dir_pn)
     end
 
-    def clean_and_ensure_dir(dir_pn)
-
-    end
-
-    def set_vars(top_dir_pn: nil, csv_fname: '')
+    def set_vars(top_dir_pn: nil, csv_pn: nil)
       raise UnspecifiedTopDirError.new( "Cli set_vars top_dir_pn=#{top_dir_pn}" ) if top_dir_pn.nil?
       @top_dir_pn = top_dir_pn
-      @csv_fname = csv_fname
+      @csv_pn = csv_pn if csv_pn
     end
 
     def setup
@@ -58,13 +60,15 @@ module Cpiconfiles
       iconlist.setup_for_iconfiles
       iconlist.analyze
 
-      iconlist.save_as_csv(@csv_fname) if !@csv_fname.nil? && @csv_fname.strip.size.positive?
       # iconlist.dump
       iconlist
     end
 
     def yaml
       iconlist = execute_body
+      # gd = GoogleDrive.new
+      # gd.upload(iconlist.save_as_csv(@csv_pn))
+
       # store_inst = iconlist.save_to_obj(-1)
       Yamlstore.add_iconlist(iconlist)
     end
@@ -72,6 +76,7 @@ module Cpiconfiles
     def json
       iconlist = execute_body
       iconlist.json
+
     end
 
     def print
@@ -92,13 +97,5 @@ module Cpiconfiles
       iconlist.print2
     end
 
-=begin
-    def restore(obj)
-      Yamlstore.restore(obj, @sizepat)
-      iconlist = setup
-      iconlist.restore
-      iconlist.print2
-    end
-=end
   end
 end

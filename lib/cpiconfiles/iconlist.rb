@@ -47,6 +47,19 @@ module Cpiconfiles
       @dump_load_result = nil
     end
 
+    def save_as_csv(csv_file_pn)
+      Loggerxcm.debug "############################## Iconlist#save_as_csv S csv_file_pn=#{csv_file_pn}"
+      csv_file_pn.open("w") do |file|
+        @iconfilegroups.map do |key, icfg|
+          raise NotInstanceOfIconfilegroupError.new("iconlist save_as_csv icfg.class=#{icfg.class}") unless icfg.instance_of?(Iconfilegroup)
+          icfg.save_as_csv(file)
+        end
+      end
+      Loggerxcm.debug "############################## Iconlist#save_as_csv E csv_file_pn=#{csv_file_pn}"
+
+      csv_file_pn
+    end
+
     def move_state
       @state = :AFTER_LOAD
     end
@@ -119,27 +132,18 @@ module Cpiconfiles
     end
 
     def load
-      @state = :IN_LOAD
-      ret , @iconfilegroup = Appenv.dump_file.load unless Appenv.dump_file.nil?
-      @dump_load_result = ret
+      if Appenv.dump_file.nil?
+        ret = false
+      else
+        @state = :IN_LOAD
+        ret , @iconfilegroup = Appenv.dump_file.load 
+        @dump_load_result = ret
+      end
       ret
     end
 
     def dump
        Appenv.dump_file.dump(@iconfilegroup)
-    end
-
-    def save_as_csv(csv_file)
-      Loggerxcm.debug "############################## Iconlist#save_as_csv S csv_file=#{csv_file}"
-      csv_file = Pathname.new(csv_file)
-      csv_file.open("w") do |file|
-        @iconfilegroups.map do |key, icfg|
-          raise NotInstanceOfIconfilegroupError.new("iconlist save_as_csv icfg.class=#{icfg.class}") unless icfg.instance_of?(Iconfilegroup)
-          icfg.save_as_csv(file)
-        end
-      end
-      Loggerxcm.debug "############################## Iconlist#save_as_csv E csv_file=#{csv_file}"
-      csv_file
     end
 
     def json
