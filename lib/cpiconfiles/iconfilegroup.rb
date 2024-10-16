@@ -1,9 +1,9 @@
 module Cpiconfiles
   # TODO: class Iconfilegroupを実装する
   class Iconfilegroup
-    @store_class = Struct.new("IconfilegroupSave", 
+    @store_class = Struct.new("IconfilegroupSave",
       :id_num,
-      :top_dir, :parent, 
+      :top_dir, :parent,
       :iconfiles_hs, :iconfiles_by_icon_size,
       :iconfilesubgroups, :iconfilesubgroups_by_icon_size,
       :iconfilesubgroups_by_icon_size_range)
@@ -213,7 +213,7 @@ module Cpiconfiles
     def save_as_csv(file)
       Loggerxcm.debug "save_as_csv S"
       @iconfiles.map do |icf|
-        file.write("#{icf.kind},#{icf.icon_size},#{icf.parent_basename},#{icf.basename},#{icf.pathn}\n")
+        file.write("#{icf.kind},#{icf.icon_size},#{icf.category},#{icf.basename},#{icf.pathn}\n")
       end
       Loggerxcm.debug "save_as_csv E"
     end

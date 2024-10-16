@@ -1,4 +1,9 @@
-/_output
+.env
+/secret/
+client*.json
+x3.csv
+xa.csv
+/_output/
 /.bundle/
 /.yardoc
 /_yardoc/

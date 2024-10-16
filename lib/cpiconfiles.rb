@@ -17,6 +17,7 @@ require_relative 'cpiconfiles/sizeddir'
 require_relative 'cpiconfiles/loggerxcm'
 
 require_relative 'cpiconfiles/google_drive'
+require_relative 'cpiconfiles/gdrive'
 
 require_relative 'cpiconfiles/csvdata'
 
