@@ -6,23 +6,26 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.1.3)
+    activesupport (7.2.3.1)
       base64
+      benchmark (>= 0.3)
       bigdecimal
-      concurrent-ruby (~> 1.0, >= 1.0.2)
+      concurrent-ruby (~> 1.0, >= 1.3.1)
       connection_pool (>= 2.2.5)
       drb
       i18n (>= 1.6, < 2)
-      minitest (>= 5.1)
-      mutex_m
-      tzinfo (~> 2.0)
-    addressable (2.8.6)
-      public_suffix (>= 2.0.2, < 6.0)
+      logger (>= 1.4.2)
+      minitest (>= 5.1, < 6)
+      securerandom (>= 0.3)
+      tzinfo (~> 2.0, >= 2.0.5)
+    addressable (2.9.0)
+      public_suffix (>= 2.0.2, < 8.0)
     ast (2.4.2)
-    base64 (0.2.0)
-    bigdecimal (3.1.6)
-    concurrent-ruby (1.2.3)
-    connection_pool (2.4.1)
+    base64 (0.3.0)
+    benchmark (0.5.0)
+    bigdecimal (4.1.1)
+    concurrent-ruby (1.3.6)
+    connection_pool (3.0.2)
     csv (3.3.5)
     debug (1.9.1)
       irb (~> 1.10)
@@ -30,12 +33,13 @@ GEM
     declarative (0.0.20)
     diff-lcs (1.5.0)
     dotenv (3.1.4)
-    drb (2.2.0)
-      ruby2_keywords
-    faraday (2.9.0)
-      faraday-net_http (>= 2.0, < 3.2)
-    faraday-net_http (3.1.0)
-      net-http
+    drb (2.2.3)
+    faraday (2.14.1)
+      faraday-net_http (>= 2.0, < 3.5)
+      json
+      logger
+    faraday-net_http (3.4.2)
+      net-http (~> 0.5)
     gems (1.2.0)
     google-api-client (0.53.0)
       google-apis-core (~> 0.1)
@@ -66,7 +70,7 @@ GEM
       os (>= 0.9, < 2.0)
       signet (>= 0.16, < 2.a)
     httpclient (2.8.3)
-    i18n (1.14.1)
+    i18n (1.14.8)
       concurrent-ruby (~> 1.0)
     io-console (0.7.1)
     irb (1.11.1)
@@ -78,24 +82,20 @@ GEM
     logger (1.7.0)
     loggerx (0.2.0)
     mini_mime (1.1.5)
-    minitest (6.0.3)
-      drb (~> 2.0)
-      prism (~> 1.5)
+    minitest (5.27.0)
     multi_json (1.15.0)
-    mutex_m (0.2.0)
-    net-http (0.4.1)
-      uri
+    net-http (0.9.1)
+      uri (>= 0.11.1)
     os (1.1.4)
     ostruct (0.6.3)
     parallel (1.24.0)
     parser (3.3.0.3)
       ast (~> 2.4.1)
       racc
-    prism (1.9.0)
     pstore (0.2.1)
     psych (5.1.2)
       stringio
-    public_suffix (5.0.4)
+    public_suffix (7.0.5)
     racc (1.7.3)
     rainbow (3.1.1)
     rake (13.1.0)
@@ -150,10 +150,10 @@ GEM
       rubocop-capybara (~> 2.17)
       rubocop-factory_bot (~> 2.22)
     ruby-progressbar (1.13.0)
-    ruby2_keywords (0.0.5)
     rufo (0.17.0)
     secretmgr (0.2.0)
       loggerx
+    securerandom (0.4.1)
     signet (0.18.0)
       addressable (~> 2.8)
       faraday (>= 0.17.5, < 3.a)
@@ -166,7 +166,7 @@ GEM
       concurrent-ruby (~> 1.0)
     uber (0.1.0)
     unicode-display_width (2.5.0)
-    uri (0.13.2)
+    uri (1.1.1)
     yard (0.9.36)
 
 PLATFORMS
