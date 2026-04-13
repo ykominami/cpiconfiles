@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bundle exec:*)",
+      "Bash(bundle update:*)",
+      "Bash(grep -v \"try\\\\|dotfiles\\\\|PATH\\\\|bash\\\\|_jl\\\\|_PATH\\\\|export\\\\|===\\\\|---\\\\|In ms\\\\|End\\\\|^$\")",
+      "Bash(bundle install:*)",
+      "Bash(grep -h \"^require \" E:/Ccur/ruby/cpiconfiles/lib/cpiconfiles/*.rb)"
+    ]
+  }
+}

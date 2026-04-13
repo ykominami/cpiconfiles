@@ -5,6 +5,10 @@ source 'https://rubygems.org'
 # Specify your gem's dependencies in cpiconfiles.gemspec
 gemspec
 
+gem 'logger'
+gem 'csv'
+gem 'ostruct'
+gem 'pstore'
 gem 'dotenv'
 gem 'google-api-client'
 gem 'loggerx', '~> 0.2.0'
