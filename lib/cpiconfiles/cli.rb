@@ -1,6 +1,6 @@
 module Cpiconfiles
   class Cli
-    def initialize(csv_fname)
+    def initialize(csv_fname = nil)
       # log_level = :debug
       log_level = :info
       Loggerxcm.log_init(log_level)
@@ -8,7 +8,7 @@ module Cpiconfiles
       # Appenv.sizepattern = @sizepat
 
       @top_dir_pn = nil
-      @csv_pn = Pathname.new(csv_fname)
+      @csv_pn = csv_fname ? Pathname.new(csv_fname) : nil
     end
 
     def csv
@@ -66,10 +66,7 @@ module Cpiconfiles
 
     def yaml
       iconlist = execute_body
-      # gd = GoogleDrive.new
-      # gd.upload(iconlist.save_as_csv(@csv_pn))
-
-      # store_inst = iconlist.save_to_obj(-1)
+      iconlist.save_as_csv(@csv_pn) if @csv_pn
       Yamlstore.add_iconlist(iconlist)
     end
 
