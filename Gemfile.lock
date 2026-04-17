@@ -167,7 +167,7 @@ GEM
     uber (0.1.0)
     unicode-display_width (2.5.0)
     uri (1.1.1)
-    yard (0.9.36)
+    yard (0.9.42)
 
 PLATFORMS
   x64-mingw-ucrt
